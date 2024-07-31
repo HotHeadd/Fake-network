@@ -1,5 +1,7 @@
 """All classes are here"""
 
+import re
+
 
 class User:
     # TODO: user class
@@ -10,6 +12,10 @@ class User:
         self.email = email
         self.total_reacions = 0
         self.posts = []
+
+    @staticmethod
+    def is_valid_email(email):
+        return re.match(r"[^@]+@[^@]+\.[^@]+", email)
 
 
 class Post:

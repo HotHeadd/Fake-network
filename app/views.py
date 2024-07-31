@@ -1,10 +1,7 @@
 from app import app, USERS, POSTS, models
 from flask import request, Response
 import json
-import re
 from http import HTTPStatus
-
-current_id = 1
 
 
 @app.post("/users/create")
@@ -14,16 +11,14 @@ def new_user():
     first_name = data["first_name"]
     last_name = data["last_name"]
     email = data["email"]
-    if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+    if not models.User.is_valid_email(email):
         response = Response(
             json.dumps({"message": "wrong email format!"}),
-            status=HTTPStatus.IM_A_TEAPOT,
-            mimetype="application/json",
+            status=HTTPStatus.BAD_REQUEST,
         )
     else:
-        user = models.User(first_name, last_name, email, current_id)
+        user = models.User(first_name, last_name, email, len(USERS))
         USERS.append(user)
-        current_id += 1
         response = Response(
             json.dumps(
                 {
@@ -39,3 +34,12 @@ def new_user():
             mimetype="application/json",
         )
     return response
+
+
+# TODO: get user info by user id
+# TODO: create post (by user id)
+# TODO: get post info by its id
+# TODO: add a reaction to a post (by a post id)
+# TODO: get all user post sorted by amount of reaction (by user id)
+# TODO: get all users sorted by amount of reactions
+# TODO: get graph of users sorted by
