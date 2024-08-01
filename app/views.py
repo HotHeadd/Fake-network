@@ -6,7 +6,6 @@ from http import HTTPStatus
 
 @app.post("/users/create")
 def new_user():
-    global current_id
     data = request.get_json()
     first_name = data["first_name"]
     last_name = data["last_name"]
@@ -20,25 +19,61 @@ def new_user():
         user = models.User(first_name, last_name, email, len(USERS))
         USERS.append(user)
         response = Response(
-            json.dumps(
-                {
-                    "id": user.id,
-                    "first_name": user.first_name,
-                    "last_name": user.last_name,
-                    "email": user.email,
-                    "total_reactions": user.total_reacions,
-                    "posts": [],
-                }
-            ),
+            json.dumps(user.get_info()),
             status=HTTPStatus.CREATED,
             mimetype="application/json",
         )
     return response
 
 
-# TODO: get user info by user id
-# TODO: create post (by user id)
-# TODO: get post info by its id
+@app.get("/users/<int:user_id>")
+def get_user(user_id):
+    if user_id < 0 or user_id >= len(USERS):
+        response = Response(status=HTTPStatus.BAD_REQUEST)
+    else:
+        user = USERS[user_id]
+        response = Response(
+            json.dumps(user.get_info()),
+            status=HTTPStatus.OK,
+            mimetype="application/json",
+        )
+    return response
+
+
+@app.post("/posts/create")
+def new_post():
+    data = request.get_json()
+    author_id = data["author_id"]
+    text = data["text"]
+    if author_id < 0 or author_id >= len(USERS):
+        response = Response(status=HTTPStatus.BAD_REQUEST)
+    else:
+        post = models.Post(author_id, text, len(POSTS))
+        POSTS.append(post)
+        author = USERS[author_id]
+        author.posts.append(post)
+        response = Response(
+            json.dumps(post.get_info()),
+            status=HTTPStatus.CREATED,
+            mimetype="application/json",
+        )
+    return response
+
+
+@app.get("/posts/<int:post_id>")
+def get_post(post_id):
+    if post_id < 0 or post_id >= len(POSTS):
+        response = Response(status=HTTPStatus.BAD_REQUEST)
+    else:
+        post = POSTS[post_id]
+        response = Response(
+            json.dumps(post.get_info()),
+            status=HTTPStatus.OK,
+            mimetype="application/json",
+        )
+    return response
+
+
 # TODO: add a reaction to a post (by a post id)
 # TODO: get all user post sorted by amount of reaction (by user id)
 # TODO: get all users sorted by amount of reactions
