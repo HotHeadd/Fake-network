@@ -51,7 +51,7 @@ def new_post():
         post = models.Post(author_id, text, len(POSTS))
         POSTS.append(post)
         author = USERS[author_id]
-        author.posts.append(post)
+        author.add_post(post)
         response = Response(
             json.dumps(post.get_info()),
             status=HTTPStatus.CREATED,
@@ -74,7 +74,24 @@ def get_post(post_id):
     return response
 
 
-# TODO: add a reaction to a post (by a post id)
+@app.post("/posts/<int:post_id>/reaction")
+def add_reaction(post_id):
+    if post_id < 0 or post_id >= len(POSTS):
+        response = Response(status=HTTPStatus.BAD_REQUEST)
+    else:
+        post = POSTS[post_id]
+        data = request.get_json()
+        user_id = data["user_id"]
+        reaction = data["reaction"]
+        if user_id < 0 or user_id >= len(USERS):
+            return Response(status=HTTPStatus.BAD_REQUEST)
+        post.add_reaction(user_id, models.Reaction(user_id, reaction))
+        response = Response(
+            status=HTTPStatus.OK,
+        )
+    return response
+
+
 # TODO: get all user post sorted by amount of reaction (by user id)
 # TODO: get all users sorted by amount of reactions
 # TODO: get graph of users sorted by

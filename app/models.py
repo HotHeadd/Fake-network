@@ -1,6 +1,7 @@
 """All classes are here"""
 
 import re
+from app import USERS
 
 
 class User:
@@ -9,7 +10,7 @@ class User:
         self.first_name = first_name
         self.last_name = last_name
         self.email = email
-        self.total_reacions = 0
+        self.total_reactions = 0
         self.posts = []
 
     @staticmethod
@@ -22,9 +23,12 @@ class User:
             "first_name": self.first_name,
             "last_name": self.last_name,
             "email": self.email,
-            "total_reactions": self.total_reacions,
+            "total_reactions": self.total_reactions,
             "posts": [post.id for post in self.posts],
         }
+
+    def add_post(self, post):
+        self.posts.append(post)
 
 
 class Post:
@@ -41,6 +45,10 @@ class Post:
             "text": self.text,
             "reactions": [reaction.reaction for reaction in self.reactions],
         }
+
+    def add_reaction(self, user_id, reaction):
+        USERS[user_id].total_reactions += 1
+        self.reactions.append(reaction)
 
 
 class Reaction:
